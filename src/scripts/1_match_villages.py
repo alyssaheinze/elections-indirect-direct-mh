@@ -31,7 +31,7 @@ def main():
     for line in lines:
         district = line[1]
         block = line[2]
-        panchayat = line[3]
+        panchayat = line[3].lower()
 
         block_id = BLOCKS.get(f'{district},{block}')
         if block_id is None:
@@ -40,7 +40,13 @@ def main():
 
         if date_villages.get(block_id) is None:
             date_villages[block_id] = []
-        date_villages[block_id].append(panchayat)
+        obj = {
+            'name': panchayat,
+            'line': line
+        }
+        date_villages[block_id].append(obj)
+
+    new_lines = []
 
     file_path = 'C:/Data_Perso/elections-indirect-direct-mh/inputs/Reservation_Sarpanch_Gram_Sevak_Group_Upa_Sarpanch.csv'
     lines = CsvWriter.read(file_path, nb_of_lines_to_be_skipped=0)
@@ -48,59 +54,43 @@ def main():
     sarpanch_villages = {}
 
     skip_first = True
-    # district_column_pos = None
-    villageid_column_pos = None
     villagename_column_pos = None
     for line in lines:
         if skip_first is True:
             skip_first = False
-            # district_column_pos = Helper.find_column_position(line, 's_q6')
             block_column_pos = Helper.find_column_position(line, 's_q5')
-            villageid_column_pos = Helper.find_column_position(line, 's_villageid')
             villagename_column_pos = Helper.find_column_position(line, 's_q1')
+            # TODO new_lines.append(line + ',division,district,block,panchayat,parsed_dates')
             continue
-        # district_id = line[district_column_pos]
         block_id = int(line[block_column_pos])
         panchayat = line[villagename_column_pos]
-        village_id = line[villageid_column_pos]
+        panchayat = panchayat.lower().replace('grampanchayat', '')
 
         if block_id not in BLOCKS.values():
-            print(f'Error block {block_id} not found in config')
+            raise Exception(f'Error block {block_id} not found in config')
+
+        potential_matches = date_villages[block_id]
+        if panchayat in potential_matches:
             continue
 
-        if sarpanch_villages.get(block_id) is None:
-            sarpanch_villages[block_id] = []
-        village = {
-            'id': village_id,
-            'name': panchayat
-        }
-        sarpanch_villages[block_id].append(village)
-
-    for block_id, villages_to_match in date_villages.items():
-        potential_matches = sarpanch_villages[block_id]
-        for date_village in villages_to_match:
-            if date_village in potential_matches:
-                continue
-
-            cmp_results = []
-            for village in potential_matches:
-                cmp_results.append({
-                    'score': textdistance.hamming(date_village, village['name']),
-                    'match': village['name'],
-                    'id': village['id'],
-                    # 'line': village['line']
-                })
-            cmp_results.sort(key=lambda v: v['score'])
-            print(f'{date_village} vs {cmp_results[0]["match"]} = {cmp_results[0]["score"]}')
-            if cmp_results[0]['score'] > 10:
-                for idx, cmp_result in enumerate(cmp_results[0:4]):
-                    print('{:>2} {}'.format(cmp_result['score'], cmp_result['match']))
-                print()
-                # selected_row = read_user_input() - 1
-                # if selected_row < 4:
-                #     line = cmp_results[selected_row]['line']
-                # elif selected_row == 4:
-                #     line = []
+        cmp_results = []
+        for village in potential_matches:
+            cmp_results.append({
+                'score': textdistance.hamming(panchayat, village['name']),
+                'match': village['name'],
+                'line': village['line']
+            })
+        cmp_results.sort(key=lambda v: v['score'])
+        print(f'{panchayat} vs {cmp_results[0]["match"]} = {cmp_results[0]["score"]}')
+        if cmp_results[0]['score'] > 10:
+            for idx, cmp_result in enumerate(cmp_results[0:4]):
+                print('{:>2} {}'.format(cmp_result['score'], cmp_result['match']))
+            print()
+            # selected_row = read_user_input() - 1
+            # if selected_row < 4:
+            #     line = cmp_results[selected_row]['line']
+            # elif selected_row == 4:
+            #     line = []
 
 
     #
