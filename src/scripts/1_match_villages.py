@@ -51,16 +51,14 @@ def main():
     file_path = 'C:/Data_Perso/elections-indirect-direct-mh/inputs/Reservation_Sarpanch_Gram_Sevak_Group_Upa_Sarpanch.csv'
     lines = CsvWriter.read(file_path, nb_of_lines_to_be_skipped=0)
 
-    sarpanch_villages = {}
-
     skip_first = True
-    villagename_column_pos = None
     for line in lines:
         if skip_first is True:
             skip_first = False
             block_column_pos = Helper.find_column_position(line, 's_q5')
             villagename_column_pos = Helper.find_column_position(line, 's_q1')
-            # TODO new_lines.append(line + ',division,district,block,panchayat,parsed_dates')
+            new_first_line = line + ['division', 'district', 'block', 'panchayat', 'parsed_dates']
+            new_lines.append(new_first_line)
             continue
         block_id = int(line[block_column_pos])
         panchayat = line[villagename_column_pos]
@@ -81,31 +79,20 @@ def main():
                 'line': village['line']
             })
         cmp_results.sort(key=lambda v: v['score'])
-        print(f'{panchayat} vs {cmp_results[0]["match"]} = {cmp_results[0]["score"]}')
-        if cmp_results[0]['score'] > 10:
-            for idx, cmp_result in enumerate(cmp_results[0:4]):
-                print('{:>2} {}'.format(cmp_result['score'], cmp_result['match']))
-            print()
-            # selected_row = read_user_input() - 1
-            # if selected_row < 4:
-            #     line = cmp_results[selected_row]['line']
-            # elif selected_row == 4:
-            #     line = []
+        print(f'{panchayat} to be matched')
+        for idx, cmp_result in enumerate(cmp_results[0:4]):
+            print('{:>2} {}'.format(cmp_result['score'], cmp_result['match']))
+        print()
+        selected_row = read_user_input() - 1
+        if selected_row < 4:
+            end_of_new_line = cmp_results[selected_row]['line']
+        elif selected_row == 4:
+            end_of_new_line = []
+        new_line = line + end_of_new_line
+        new_lines.append(new_line)
 
-
-    #
-    # for line in lines:
-    #     res = Helper.find_column_position(line, 's_q5')
-    #     res = Helper.find_column_position(line, 's_q6')
-    #
-    #     division = line[0]
-    #     district = line[1]
-    #     block = line[2]
-    #     panchayat = line[3]
-    #
-    # final_file_path = f'C:/Data_PoloFr/scrap-maharashtra-gp/results/election_dates_wide.csv'
-    # with open(final_file_path, 'w', newline='', encoding='utf8') as csv_file:
-    #     csv_file.writelines(lines)
+    file_path = 'C:/Data_Perso/elections-indirect-direct-mh/intermediary_results/Reservation_Sarpanch_Gram_Sevak_Group_Upa_Sarpanch_Election_Date.csv'
+    CsvWriter.write(file_path, new_lines)
 
 
 if __name__ == '__main__':
