@@ -60,7 +60,7 @@ def main():
             new_first_line = line
             new_lines.append(new_first_line)
             continue
-        if True:
+        if len(line) > 1290:
             new_lines.append(line)
             continue
         block_id = int(line[block_column_pos])
