@@ -48,7 +48,7 @@ def main():
 
     new_lines = []
 
-    file_path = 'C:/Data_Perso/elections-indirect-direct-mh/inputs/Reservation_Sarpanch_Gram_Sevak_Group_Upa_Sarpanch.csv'
+    file_path = 'C:/Data_Perso/elections-indirect-direct-mh/intermediary_results/Reservation_Sarpanch_Gram_Sevak_Group_Upa_Sarpanch_Election_Date.csv'
     lines = CsvWriter.read(file_path, nb_of_lines_to_be_skipped=0)
 
     skip_first = True
@@ -57,8 +57,11 @@ def main():
             skip_first = False
             block_column_pos = Helper.find_column_position(line, 's_q5')
             villagename_column_pos = Helper.find_column_position(line, 's_q1')
-            new_first_line = line + ['division', 'district', 'block', 'panchayat', 'parsed_dates']
+            new_first_line = line
             new_lines.append(new_first_line)
+            continue
+        if True:
+            new_lines.append(line)
             continue
         block_id = int(line[block_column_pos])
         panchayat = line[villagename_column_pos]
