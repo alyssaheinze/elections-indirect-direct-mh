@@ -86,7 +86,7 @@ def main():
         cmp_results = []
         for village in potential_matches:
             cmp_results.append({
-                'score': textdistance.hamming(panchayat, village['name']),
+                'score': textdistance.damerau_levenshtein(panchayat, village['name']),
                 'match': village['name'],
                 'line': village['line']
             })
@@ -94,7 +94,7 @@ def main():
         print(f'{panchayat} to be matched within district {district} block {block_id} == {find_block_name_from_id(block_id)}')
         number_of_choice = 10
         for idx, cmp_result in enumerate(cmp_results[0:number_of_choice]):
-            print('{:>2} {}'.format(cmp_result['score'], cmp_result['match']))
+            print('{:>2} {} {:>2}'.format(idx + 1, cmp_result['match'], cmp_result['score']))
         print()
         selected_row = read_user_input(number_of_choice)
         if selected_row < number_of_choice:

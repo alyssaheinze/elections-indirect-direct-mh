@@ -74,7 +74,7 @@ def main():
         cmp_results = []
         for village in potential_matches:
             cmp_results.append({
-                'score': textdistance.hamming(panchayat, village['name']),
+                'score': textdistance.damerau_levenshtein(panchayat, village['name']),
                 'match': village['name'],
                 'line': village['line']
             })
