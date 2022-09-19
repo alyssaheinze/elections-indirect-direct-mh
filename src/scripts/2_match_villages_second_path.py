@@ -9,18 +9,25 @@ from src.utils.helper import Helper
 from src.config.blocks import BLOCKS
 
 
-def read_user_input():
-    value = input('Please enter 1 to 5\n')
+def read_user_input(number_of_choice):
+    value = input(f'Please enter 1 to {number_of_choice + 1}\n')
     try:
         value = int(value)
-        if value < 1 or value > 5:
+        if value < 1 or value > number_of_choice + 1:
             raise
     except:
-        value = input('Please enter 1 to 5\n')
+        value = input(f'Please enter 1 to {number_of_choice + 1}\n')
         value = int(value)
-        if value < 1 or value > 5:
+        if value < 1 or value > number_of_choice + 1:
             raise Exception('Incorrect input')
-    return value
+    return value - 1
+
+
+def find_block_name_from_id(block_id):
+    for name, id in BLOCKS.items():
+        if id == block_id:
+            return name
+    raise Exception(f'Did not find a match for {block_id}')
 
 
 def main():
@@ -55,6 +62,7 @@ def main():
     for line in lines:
         if skip_first is True:
             skip_first = False
+            district_column_pos = Helper.find_column_position(line, 's_q6')
             block_column_pos = Helper.find_column_position(line, 's_q5')
             villagename_column_pos = Helper.find_column_position(line, 's_q1')
             new_first_line = line
@@ -64,6 +72,7 @@ def main():
             new_lines.append(line)
             continue
         block_id = int(line[block_column_pos])
+        district = line[district_column_pos]
         panchayat = line[villagename_column_pos]
         panchayat = panchayat.lower().replace('grampanchayat', '')
 
@@ -82,14 +91,15 @@ def main():
                 'line': village['line']
             })
         cmp_results.sort(key=lambda v: v['score'])
-        print(f'{panchayat} to be matched')
-        for idx, cmp_result in enumerate(cmp_results[0:4]):
+        print(f'{panchayat} to be matched within district {district} block {block_id} == {find_block_name_from_id(block_id)}')
+        number_of_choice = 10
+        for idx, cmp_result in enumerate(cmp_results[0:number_of_choice]):
             print('{:>2} {}'.format(cmp_result['score'], cmp_result['match']))
         print()
-        selected_row = read_user_input() - 1
-        if selected_row < 4:
+        selected_row = read_user_input(number_of_choice)
+        if selected_row < number_of_choice:
             end_of_new_line = cmp_results[selected_row]['line']
-        elif selected_row == 4:
+        else:
             end_of_new_line = []
         new_line = line + end_of_new_line
         new_lines.append(new_line)
