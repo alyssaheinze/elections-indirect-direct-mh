@@ -16,6 +16,10 @@ def main():
         if skip_first is True:
             print(f'parsed_dates 1291 {line[1291]}')
             skip_first = False
+            line.pop()
+            more_columns = ['parsed_date_1', 'original_date_1', 'parsed_date_2', 'original_date_2', 'parsed_date_3',
+                            'original_date_3', 'parsed_date_4', 'original_date_4','parsed_date_5', 'original_date_5']
+            line = line + more_columns
             new_lines.append(line)
             continue
         if len(line) < 1291:
